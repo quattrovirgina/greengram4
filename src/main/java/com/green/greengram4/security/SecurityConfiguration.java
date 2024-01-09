@@ -4,24 +4,27 @@ import com.google.api.Http;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
-
 public class SecurityConfiguration {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(http -> http.disable())
+                .formLogin(form -> form.disable())
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/user/sign-in"
-                                , "/api/user/sign-up"
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/user/signin"
+                                , "/api/user/signup"
                                 , "/error"
                                 , "/err"
                                 , "/"
@@ -41,6 +44,11 @@ public class SecurityConfiguration {
                                 .anyRequest().hasRole("ADMIN") */
                 )
                 // permitAll은 아무값이 있어도 통과해둘것
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(except -> {
+                    except.authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                            .accessDeniedHandler(new JwtAccessDeniedHandler());
+                })
                 .build();
         // session을 사용하지 않겠음
         // session의 단점: 쿠키에 비해 더럽게 느림. 해킹의 위험성도 있는편.
