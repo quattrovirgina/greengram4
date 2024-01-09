@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.green.greengram4.user.UserMapper">
+    <insert id="insUser" useGeneratedKeys="true" keyProperty="iuser">
+        INSERT INTO t_user
+            SET uid = #{uid},
+            upw = #{upw},
+            nm = #{nm}
+        <if test="pic != null and pic != '' ">
+            ,pic = #{pic}
+        </if>
+    </insert>
+    <!-- 회원가입시 사용자 아이디 및 비번을 삽입 -->
+
+    <select id="selUser">
+        SELECT iuser, uid, upw, nm, pic, created_at AS createdAt, updated_at AS updatedAt
+        FROM t_user
+        <where>
+            <if test="uid != null and uid != '' ">
+                uid = #{uid}
+            </if>
+        </where>
+    </select>
+    <!-- sql 내에 해당되는 사용자를 뽑는다 -->
+
+    <select id="selUserById">
+        SELECT upw FROM t_user
+        WHERE uid = #{uid}
+    </select>
+    <select id="selUserSignin">
+        SELECT iuser, nm, pic FROM t_user
+        WHERE uid = #{uid}
+    </select>
+
+    <insert id="InsFollow">
+        INSERT INTO t_user_follow
+        SET from_iuser = #{fromIuser}, to_iuser = #{toIuser}
+    </insert>
+
+    <delete id="DelFollow">
+        DELETE FROM t_user_follow
+        WHERE from_iuser = #{fromIuser} AND to_iuser = #{toIuser}
+    </delete>
+    <select id="SelUserInfo">
+        SELECT  A.nm, A.pic, A.created_at AS createdAt,
+        COUNT(DISTINCT B.ifeed) AS feedCnt,
+        COUNT(C.ifeed) AS favCnt,
+        D.following, D.follower, D.followState
+        FROM t_user A
+        LEFT JOIN t_feed B
+        ON A.iuser = B.iuser
+        LEFT JOIN t_feed_fav C
+        ON B.ifeed = C.ifeed
+        INNER JOIN(
+            SELECT #{targetIuser} AS iuser,
+            SUM(IF(from_iuser = #{targetIuser}, 1, 0)) AS following,
+            SUM(CASE to_iuser WHEN #{targetIuser} THEN 1 ELSE 0 END) AS follower,
+            (SUM(CASE WHEN from_iuser = #{loginedIuser} AND to_iuser = #{targetIuser} THEN 1 ELSE 0 END)
+            + SUM(CASE WHEN from_iuser = #{loginedIuser} AND to_iuser = #{loginedIuser} THEN 2 ELSE 0 END)) AS followState
+            FROM t_user_follow
+        ) AS D
+        ON A.iuser = D.iuser
+        WHERE A.iuser = #{targetIuser}
+
+    </select>
+
+
+</mapper>

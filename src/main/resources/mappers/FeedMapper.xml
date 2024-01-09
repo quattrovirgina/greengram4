@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.green.greengram4.feed.FeedMapper">
+    <insert id="insFeed" useGeneratedKeys="true" keyProperty="ifeed">
+        <!-- insFeed라는 아이디를 주고 sql의 ifeed 열에 있는 데이터를 가져올것. -->
+        INSERT INTO t_feed (iuser, contents, location)
+        <!-- t_feed라는 테이블에서 iuser, contents, location 데이터를 삽입한다-->
+        VALUES(#{iuser}, #{contents}, #{location})
+        <!-- 이때 값은 여기서 입력한 iuser, contents, location을 쿼리에 입력받는다 -->
+        <!-- SET iuser = #{iuser}, contents = #{contents}, location = #{location} -->
+    </insert>
+    <select id="selFeedAll">
+       <!--  selFeedAll이라는 아이디를 주고 sql에서 데이터를 선택한다
+        SELECT A.ifeed, A.contents, A.location, A.created_at AS createdAt,-->
+        <!-- 2. t_feed의 ifeed, contents, location, created_at은 createdAt으로 alias를 준다
+        A.iuser AS writerIuser, B.nm AS writerNm, B.pic AS writerPic, C.ifeed AS isFav
+         그리고 t_feed의 iuser도 writerIuser라는 alias를 주고 t_user의 nm도 writerNm이라는 alias를, pic도 writerPic이라는
+         alias를 준다
+        FROM t_feed A
+         t_feed 테이블의 alias는 A라고 주고
+        JOIN t_user B
+         t_user 테이블의 alias는 B라고 주고 A안에서 join한다
+        ON A.iuser = B.iuser
+         이때 A의 iuser값과 B의 iuser값에 모두 해당되는 데이터를 출력할것
+        LEFT JOIN t_feed_fav C
+
+        ON A.iuser = C.iuser
+
+        ORDER BY A.ifeed DESC ifeed를 내림차순으로 정렬할것 -->
+        SELECT B.ifeed, B.contents, B.location, B.created_at AS createdAt, A.iuser AS writerIuser, A.nm AS writerNm,
+        A.pic AS writerPic, if(C.ifeed IS NULL, 0, 1)AS isFav
+        <!-- t_feed B에서 ifeed, contents, location, created_at의 alias를 createdAt으로 주고 -->
+        <!-- t_user A에서 iuser의 alias를 writerIuser, nm의 alias를 writerNm으로 하고, pic의 alias를 writerPic으로 하고 -->
+        <!-- t_feed_fav C는 ifeed가 NULL일 경우 0을 출력하고 아니면 1을 담아두는 조건문의 alias를 isFav로 정해준다 -->
+        FROM t_user A
+        JOIN t_feed B
+        <!-- t_user인 A에서 t_feed B를 inner join 한다 -->
+        ON A.iuser = B.iuser
+        <!-- A와 B에 공통으로 들어있는 iuser 위주로 inner join 할것 -->
+        <choose> <!-- 그런데 -->
+            <when test="isFavList == 1"> <!-- 만약  mapper에 있는 isFavList가 1이라면 -->
+                INNER JOIN t_feed_fav C
+                <!-- t_feed_fav에 해당하는 C를 inner join 한다 -->
+            </when>
+            <otherwise> <!-- 그게 아니라면 -->
+                LEFT JOIN t_feed_fav C
+                <!-- t_feed_fav인 C를 왼쪽에서 join 하도록 할것 -->
+            </otherwise>
+        </choose>
+        ON B.ifeed = C.ifeed
+        <!-- inner join인 경우 B와 C에 해당하는 ifeed값을 세워놓고 -->
+        <!-- left join인 경우 B의 ifeed에는 C의 ifeed가 들어올것 -->
+        and C.iuser = #{loginedIuser}
+        <!-- LEFT JOIN한 C의 iuser의 값은 loginedIuser로 넘어간다 -->
+        <if test = "targetIuser > 0"> <!-- 만약 targetIuser가 0보다 큰경우 -->
+            WHERE A.iuser = #{targetIuser}
+            <!-- A의 iuser는 targetIuser의 값을 그대로 적용한다 -->
+        </if>
+        ORDER BY B.ifeed DESC
+        <!-- 정렬시 B의 ifeed가 내림차순으로 정렬하도록 할것 -->
+        LIMIT #{startIdx}, #{finishIdx}
+        <!-- 여기서 입력받은 startIdx부터 finishIdx까지 제한을 걸어둘것-->
+    </select>
+    <select id = "selectiuser">
+        SELECT iuser FROM t_feed <!-- t_feed로부터 iuser를 뽑는다 -->
+        WHERE ifeed = #{ifeed} <!-- 이때 ifeed는 입력받은 ifeed값에 해당되는 데이터가 있으면 뽑아놓을것 -->
+    </select>
+
+    <delete id="DelFeed">
+        DELETE FROM t_feed
+        <!-- t_feed로부터 행을 삭제할것 -->
+        WHERE iuser = #{iuser} AND ifeed = #{ifeed}
+        <!-- iuser는 입력받은 iuser값과 동일해야 하고 -->
+        <!-- ifeed도 입력받은 ifeed값과 동일해야 할것 -->
+    </delete>
+</mapper>
+    <!--  -->
+    <!-- <delete id="delFeed">
+        DELETE FROM t_feed
+        <!- - t_feed로부터 삭제하라 -->
+        <!-- WHERE ifeed = #{ifeed} -->
+        <!-- ifeed는 입력받은 ifeed에 해당하는 값이 있으면 삭제할것 -->
+        <!-- AND iuser = #{iuser} -->
+        <!-- 그리고 iuser도 입력받은 iuser에 해당하는 값이 있으면 삭제할것 -->
+        <!-- </delete>-->

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.green.greengram4.feed.FeedPicsMapper">
+    <insert id="insFeedPics">
+        INSERT INTO t_feed_pics
+        <!-- t_feed_pics 내에서 데이터를 삽입하라 -->
+        (ifeed, pic)
+        <!-- ifeed 및 pic 데이터값을 -->
+        VALUES
+        <foreach collection="pics" item="item" open="(" close=")" separator="),(">
+            #{ifeed}, #{item}
+            <!-- 만약 pics 쪽에 null이 아닌 값이 온다면 -->
+            <!-- item의 pictures값을 해당 ifeed에 저장하라 -->
+        </foreach>
+        <!-- -->
+    </insert>
+    <select id="SelFeedPics">
+        SELECT pic FROM t_feed_pics
+        <!-- t_feed_pics 으로부터 pic 테이블을 선택하라 -->
+        WHERE ifeed = #{ifeed}
+        <!-- ifeed에 해당되는 값이 있을경우에 그에 해당하는 테이블을 선택할것-->
+    </select>
+
+    <delete id="DelFeedPics">
+        DELETE FROM t_feed_pics WHERE ifeed = #{ifeed}
+        <!-- t_feed_pics으로부터 ifeed에 해당하는 pics값을 지워라 -->
+    </delete>
+
+</mapper>
+
+<!-- 사진정보, 좋아요, 코멘트 까지 먼저 지워주고 그담에 feed자체를 지울것 -->

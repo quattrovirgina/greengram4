@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.green.greengram4.feed.FeedCommentMapper">
+    <insert id="insFeedComment" useGeneratedKeys="true" keyProperty="ifeedComment"> <!-- 여기서는 _가 필요없음 -->
+        INSERT INTO t_feed_comment <!-- t_feed_comment에다 데이터를 넣는다 -->
+        SET iuser = #{iuser}, ifeed = #{ifeed}, comments = #{comment}
+        <!-- iuser, ifeed, comments는 입력받은 값들에 해당하는 데이터가 있으면 삽입할것. 즉 null이 아니면 됨 -->
+    </insert>
+    <select id="selFeedCommentAll">
+        <!-- primary key, comment, created_at, primary key iuser, name, pic(profile), 페이징 처리 -->
+        SELECT A.ifeed_comment AS ifeedComment, A.comments AS comment,
+        <!-- t_feed_comment에 해당하는 A에서 ifeedComment, comment를 뽑는다 -->
+        A.created_at AS createdAt, B.iuser AS writerIuser,
+        <!-- created_at을 createdAt, t_user에 해당하는 B에서 iuser를 writerIuser로 칭한다 -->
+        B.nm AS writerNm, B.pic AS writerPic
+        <!-- nm을 writerNm, pic을 writerPic이라고 칭한다 -->
+        FROM t_feed_comment A
+        <!-- t_feed_comment A에서 -->
+        JOIN t_user B ON A.iuser = B.iuser
+        <!-- A와 B에 공통으로 들어있는 iuser 데이터값을 기준으로 B를 inner join 하라-->
+        WHERE A.ifeed = #{ifeed}
+        <!-- t_feed_comment A는 입력받은 ifeed에 해당하는 값이 있을 때 뽑을것 -->
+        ORDER BY A.ifeed
+        <!-- A의 ifeed를 기준으로 데이터를 조회할것 -->
+        LIMIT #{StartIdx}, #{rowCount}
+        <!-- 조회 범위는 StartIdx부터 rowCount까지를 범위로 한다 -->
+    </select>
+
+    <delete id="delFeedComment">
+        DELETE FROM t_feed_comment WHERE ifeed = #{ifeed}
+        <!-- ifeed는 입력받은 ifeed에 해당하는 데이터만큼 t_feed_comment로부터 삭제할것 -->
+    </delete>
+
+    <delete id="delFeedcommentAll">
+        DELETE FROM t_feed_comment
+        <!-- t_feed_comment로부터 삭제하라 -->
+        WHERE ifeed = #{ifeed}
+        <!-- ifeed가 입력받은 ifeed에 해당하는 데이터가 있을 경우에 삭제할것 -->
+    </delete>
+</mapper>
+
+<!-- -->
