@@ -24,7 +24,8 @@ import java.util.Date;
 @Component
 // @Component는 bean 등록
 @RequiredArgsConstructor
-public class JwtTokenProvider {
+public class
+JwtTokenProvider {
 
     private final ObjectMapper om; // jackson 라이브러리에 있음
 
@@ -78,7 +79,7 @@ public class JwtTokenProvider {
             String json = om.writeValueAsString(principal);
 
             return Jwts.claims()
-                    .add("iuser", json)
+                    .add("user", json)
                     .build();
         } catch(Exception e) {
             return null;

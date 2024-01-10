@@ -13,7 +13,7 @@
     <!-- 회원가입시 사용자 아이디 및 비번을 삽입 -->
 
     <select id="selUser">
-        SELECT iuser, uid, upw, nm, pic, created_at AS createdAt, updated_at AS updatedAt
+        SELECT iuser, uid, upw, nm, pic, created_at AS createdAt, updated_at AS updatedAt, firebase_token AS firebaseToken
         FROM t_user
         <where>
             <if test="uid != null and uid != '' ">

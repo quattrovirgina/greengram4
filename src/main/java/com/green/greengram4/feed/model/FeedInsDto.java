@@ -8,6 +8,7 @@ import java.util.List;
 public class FeedInsDto {
     @JsonIgnore
     private int ifeed;
+    @JsonIgnore
     private int iuser;
     private String contents;
     private String location;
