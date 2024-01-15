@@ -1,9 +1,14 @@
 package com.green.greengram4.user;
 
 
+import com.green.greengram4.common.Const;
+import com.green.greengram4.common.CookieUtils;
 import com.green.greengram4.common.ResVo;
 import com.green.greengram4.user.model.*;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +29,10 @@ public class UserController {
 
     @PostMapping("/signin")
     @Operation(summary = "테스트", description = "아이디 및 비번을 활용한 인증처리")
-    public UserSigninVo postSignin(@RequestBody UserSigninDto dto) {
+    public UserSigninVo postSignin(HttpServletRequest req, HttpServletResponse res, @RequestBody UserSigninDto dto) {
             log.info("dto: {}", dto);
-            return service.signin(dto);
+            return service.signin(req, res, dto);
+            // result >> 1은 성공, 2는 아이디 x, 3은 비번틀림
     }
     // 로그인
     // 소재: pk, 이름, 프로필사진
@@ -44,5 +50,17 @@ public class UserController {
         return service.getUserInfo(dto);
     }
     // 사용자 정보 가져옴
+
+    // 로그아웃
+    @PostMapping("/signout")
+    public ResVo postSignout(HttpServletRequest req, HttpServletResponse res) {
+        return service.signout(req, res);
+    }
+
+    @GetMapping("/refresh-token")
+    public UserSigninVo getRefreshToken(HttpServletRequest req) {
+        return service.getRefreshToken(req);
+
+    }
 }
 

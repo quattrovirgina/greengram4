@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.greengram4.common.AppProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Date;
 
@@ -33,7 +33,6 @@ JwtTokenProvider {
     /*  private final String headerSchemeName;
         private final String tokenType;
         private final String secret; */
-    private Key key;
 
      /* public JwtTokenProvider(@Value("${springboot.jwt.secret}") String secret,
                             @Value("${springboot.jwt.header-scheme-name}") String headerSchemeName,
@@ -45,14 +44,19 @@ JwtTokenProvider {
         log.info("secret: {}", secret);
     } */
 
+    private SecretKeySpec secretKeySpec;
+
     @PostConstruct
     // bean등록이 되어야 하고, init 호출전에 di부터 전부 이뤄짐, 그리고 호출
     // 메소드 호출전에 미리 짜놓는 annotation
     public void init() {
-        log.info("secret: {}", appProperties.getJwt().getSecret());
+        /* log.info("secret: {}", appProperties.getJwt().getSecret());
         byte[] keyBytes = Decoders.BASE64.decode(appProperties.getJwt().getSecret());
         log.info("keyBytes: {}", keyBytes);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.key = Keys.hmacShaKeyFor(keyBytes); */
+
+        this.secretKeySpec = new SecretKeySpec(appProperties.getJwt().getSecret().getBytes()
+        , SignatureAlgorithm.HS256.getJcaName());
     }
 
     public String generateAccessToken(MyPrincipal myPrincipal) {
@@ -70,7 +74,7 @@ JwtTokenProvider {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 // 이건 미국판
                 .expiration(new Date(System.currentTimeMillis() + tokenValidMs))
-                .signWith(this.key) // 이것으로 암호화
+                .signWith(secretKeySpec) // 이것으로 암호화(this.key)
                 .compact();
     }
 
@@ -116,11 +120,18 @@ JwtTokenProvider {
     }
 
     private Claims getAllClaims(String token) {
-        return Jwts.parser()
+        /*return Jwts.parser()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
-                .getBody();
+                .getBody(); */
+
+        return Jwts
+                .parser()
+                .verifyWith(secretKeySpec)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public Authentication getAuthentication(String token) {
@@ -130,7 +141,7 @@ JwtTokenProvider {
                : new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    private UserDetails getUserDetailsFromToken(String token) {
+    public UserDetails getUserDetailsFromToken(String token) {
         try {
             Claims claims = getAllClaims(token);
             String json = (String) claims.get("user");

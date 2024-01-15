@@ -3,10 +3,16 @@ package com.green.greengram4.user;
 import com.google.firebase.database.annotations.NotNull;
 import com.green.greengram4.common.AppProperties;
 import com.green.greengram4.common.Const;
+import com.green.greengram4.common.CookieUtils;
 import com.green.greengram4.common.ResVo;
 import com.green.greengram4.security.JwtTokenProvider;
 import com.green.greengram4.security.MyPrincipal;
+import com.green.greengram4.security.MyUserDetails;
 import com.green.greengram4.user.model.*;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
@@ -23,6 +29,9 @@ public class UserService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final AppProperties appProperties;
+
+    private final CookieUtils cookieUtils;
 
     public ResVo signup(UserSignupDto dto) {
         /*String str = dto.getUpw();// postman 및 swagger에서 비번을 str에 저장하고
@@ -52,7 +61,8 @@ public class UserService {
         return new ResVo(pDto.getIuser()); //회원 가입한 iuserpk값이 리턴
     }
 
-    public UserSigninVo signin(UserSigninDto dto) {
+    public UserSigninVo signin(HttpServletRequest req, HttpServletResponse res, UserSigninDto dto) {
+
         UserSelDto vo = new UserSelDto();
         vo.setUid(dto.getUid());
 
@@ -70,7 +80,12 @@ public class UserService {
 
         String at = jwtTokenProvider.generateAccessToken(myPrincipal);
         String rt = jwtTokenProvider.generateRefreshToken(myPrincipal);
-        // 내일할거
+
+        int rtCookieMaxAge = (int)appProperties.getJwt().getRefreshTokenExpiry() / 1000;
+        // 2024.1.9에 여기까지
+
+         cookieUtils.deleteCookie(req, res, "rt");
+         cookieUtils.setCookie(res, "rt", rt, rtCookieMaxAge);
 
         return UserSigninVo.builder()
                 .result(Const.SUCCESS)
@@ -93,6 +108,36 @@ public class UserService {
         }
         int insAffectedRows = mapper.InsFollow(dto);
         return new ResVo(Const.SUCCESS);
+    }
+
+    public ResVo signout(HttpServletRequest req, HttpServletResponse res) {
+
+        cookieUtils.deleteCookie(req, res, "rt");
+
+        return new ResVo(1);
+    }
+
+    public UserSigninVo getRefreshToken(HttpServletRequest req) {
+
+        Cookie cookie = cookieUtils.getCookie(req, "rt");
+        String token = cookie.getValue();
+        if(!jwtTokenProvider.isValidateToken(token)) {
+            return UserSigninVo.builder()
+                    .result(Const.FAIL)
+                    .accessToken(null)
+                    .build();
+        }
+
+        MyUserDetails myUserDetails = (MyUserDetails) jwtTokenProvider.getUserDetailsFromToken(token);
+
+        MyPrincipal myPrincipal = myUserDetails.getMyPrincipal();
+
+        String at = jwtTokenProvider.generateAccessToken(myPrincipal);
+
+        return UserSigninVo.builder()
+                .result(Const.SUCCESS)
+                .accessToken(at)
+                .build();
     }
 
 }

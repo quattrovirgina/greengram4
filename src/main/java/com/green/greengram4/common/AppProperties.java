@@ -21,6 +21,11 @@ public class AppProperties {
         private long accessTokenExpiry;
         private long refreshTokenExpiry;
 
+        public void setRefreshTokenExpiry(long refreshTokenExpiry) {
+            this.refreshTokenExpiry = refreshTokenExpiry;
+            this.refreshTokenExpiry = refreshTokenExpiry / 1000;
+        }
+
 
     }
 }

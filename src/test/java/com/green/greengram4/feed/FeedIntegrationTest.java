@@ -34,7 +34,7 @@ public class FeedIntegrationTest extends BaseIntegrationTest {
         // reference = 주소값, primitive = 값이 저장됨
 
         List<String> pics = new ArrayList();
-        dto.setPics(pics);
+        // dto.setPics(pics);
 
         pics.add("https://search.pstatic.net/common/?src=http%3A%2F%2Fshop1.phinf.naver.net%2F20221024_297%2F1666622347510e9kgB_JPEG%2F67758131223541321_2059836904.jpg&type=sc960_832");
         pics.add("https://search.pstatic.net/common/?src=http%3A%2F%2Fshop1.phinf.naver.net%2F20221024_297%2F1666622347510e9kgB_JPEG%2F67758131223541321_2059836904.jpg&type=sc960_832");
