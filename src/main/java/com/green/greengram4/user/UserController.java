@@ -11,7 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController // 콘트롤러의 핵1
 @RequiredArgsConstructor // 콘트롤러의 핵2
@@ -61,6 +63,12 @@ public class UserController {
     public UserSigninVo getRefreshToken(HttpServletRequest req) {
         return service.getRefreshToken(req);
 
+    }
+
+
+    @PatchMapping("/pic")
+    public UserPicPatchDto patchUserPic(@RequestPart MultipartFile pic) {
+        return service.patchUserPic(pic);
     }
 }
 

@@ -1,10 +1,8 @@
 package com.green.greengram4.user;
 
 import com.google.firebase.database.annotations.NotNull;
-import com.green.greengram4.common.AppProperties;
-import com.green.greengram4.common.Const;
-import com.green.greengram4.common.CookieUtils;
-import com.green.greengram4.common.ResVo;
+import com.green.greengram4.common.*;
+import com.green.greengram4.security.AuthenticationFacade;
 import com.green.greengram4.security.JwtTokenProvider;
 import com.green.greengram4.security.MyPrincipal;
 import com.green.greengram4.security.MyUserDetails;
@@ -18,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
@@ -32,6 +31,10 @@ public class UserService {
     private final AppProperties appProperties;
 
     private final CookieUtils cookieUtils;
+
+    private final AuthenticationFacade authenticationFacade;
+
+    private final MyFileUtils myFileUtils;
 
     public ResVo signup(UserSignupDto dto) {
         /*String str = dto.getUpw();// postman 및 swagger에서 비번을 str에 저장하고
@@ -138,6 +141,22 @@ public class UserService {
                 .result(Const.SUCCESS)
                 .accessToken(at)
                 .build();
+    }
+
+    public UserPicPatchDto patchUserPic(MultipartFile mult) {
+
+        UserPicPatchDto dto = new UserPicPatchDto();
+
+        dto.setIuser(authenticationFacade.getLoginUserPk());
+
+        String savedPicFileNm = myFileUtils.transferTo(mult, "/user/" + dto.getIuser());
+
+        dto.setPic(savedPicFileNm);
+
+        int affectedRows = mapper.updUserPic(dto);
+
+        return dto;
+
     }
 
 }

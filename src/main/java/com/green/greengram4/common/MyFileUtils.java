@@ -73,4 +73,20 @@ public class MyFileUtils {
             return null;
         }
     }
+
+    public void delFiles(String folderpath) { // 폴더 아래에 폴더 및 파일 삭제하되 보내는 폴더는 삭제하지 않음
+        File folder = new File(uploadPrefixPath, folderpath);
+        if(folder.exists()) {
+            File[] files = folder.listFiles(); //파일 배열
+
+            for(File file : files) {
+                if(file.isDirectory()) {
+                    String absolutepath = file.getAbsolutePath();
+                    String targetFolder = absolutepath.replace(uploadPrefixPath, "");
+                    delFiles(targetFolder);
+                }
+                file.delete();
+            }
+        }
+    }
 }

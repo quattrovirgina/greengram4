@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.greengram4.common.ResVo;
 import com.green.greengram4.feed.model.FeedDelDto;
 import com.green.greengram4.feed.model.FeedInsDto;
+import com.green.greengram4.feed.model.FeedPicsInsDto;
 import com.green.greengram4.feed.model.FeedSelVo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ class FeedControllerTest {
     @Test
     void postFeed() throws Exception {
 
-        ResVo result = new ResVo(5);
+        FeedPicsInsDto result = new FeedPicsInsDto();
 
         //when(service.postFeed(any()));
         given(service.postFeed(any())).willReturn(result);

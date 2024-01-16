@@ -12,7 +12,6 @@
             <!-- 만약 pics 쪽에 null이 아닌 값이 온다면 -->
             <!-- item의 pictures값을 해당 ifeed에 저장하라 -->
         </foreach>
-        <!-- -->
     </insert>
     <select id="SelFeedPics">
         SELECT pic FROM t_feed_pics

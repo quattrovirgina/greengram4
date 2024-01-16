@@ -36,5 +36,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+    // 프론트에서 요청할때마다 authentication이 있으면 getcontext의 setAuthentication을 담는다
 }
 

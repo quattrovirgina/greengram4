@@ -25,7 +25,7 @@ public class FeedService {
    private final AuthenticationFacade authenticationFacade;
    private final MyFileUtils myFileUtils;
 
-   public ResVo postFeed(FeedInsDto dto) {
+   public FeedPicsInsDto postFeed(FeedInsDto dto) {
 
       dto.setIuser(authenticationFacade.getLoginUserPk());
       log.info("dto = {}",dto);
@@ -43,7 +43,7 @@ public class FeedService {
       }
 
       int feedPicsAffectedRows = picsMapper.insFeedPics(dto2);
-      return new ResVo(dto.getIfeed());
+      return dto2;
    }
 
    public List<FeedSelVo> getFeedAll(FeedSelDto dto) {

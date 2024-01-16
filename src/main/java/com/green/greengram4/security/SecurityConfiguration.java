@@ -30,6 +30,14 @@ public class SecurityConfiguration {
                                 , "/error"
                                 , "/err"
                                 , "/"
+                                , "/pic/**"
+                                , "/profile"
+                                , "/profile/**"
+                                , "/feed"
+                                , "/feed/**"
+                                , "/fimg/**"
+                                , "/css/**"
+                                , "/static/**"
                                 , "/index.html"
                                 , "/static/**"
                                 , "/swagger.html"
@@ -57,8 +65,6 @@ public class SecurityConfiguration {
         // csrf(Cross Site Request Forgery): 적어도 스프링 기법이 사용된 보안기법들 중 하나.
         // requestMatchers 반드시 구글링할것
         //
-
-
     }
 
     @Bean

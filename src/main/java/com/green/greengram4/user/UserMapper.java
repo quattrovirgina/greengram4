@@ -15,6 +15,9 @@ public interface UserMapper {
 
     int DelFollow(UserFollowDto dto);
 
+    int updUserFirebaseToken(UserFirebaseTokenPatchDto dto);
+    int updUserPic(UserPicPatchDto dto);
+
 
 
 
